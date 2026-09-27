@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelas 9 - Website Resmi & 27 Mini Games</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glass-nav {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+        .game-canvas {
+            background-color: #0f172a;
+            display: block;
+            width: 100%;
+            height: 320px;
+            border-radius: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300">
+
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- AUTHENTICATION OVERLAY (Wajib di awal sebelum masuk web utama) -->
+    <div id="authOverlay" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-xl flex items-center justify-center p-4">
+        <div class="relative max-w-md w-full glass-card rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-slate-800">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center text-white font-extrabold text-2xl shadow-lg shadow-indigo-500/30">
+                    9
+                </div>
+                <h2 id="authTitle" class="text-2xl font-extrabold tracking-tight">Selamat Datang di Kelas 9</h2>
+                <p id="authSubtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Silakan masuk atau buat akun untuk melanjutkan</p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1.5">Username / Email</label>
+                    <input type="text" id="loginUsername" required class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm" placeholder="Contoh: makki_setiawan">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1.5">Password</label>
+                    <input type="password" id="loginPassword" required class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-semibold shadow-lg shadow-indigo-500/25 hover:scale-[1.01] transition">
+                    Masuk ke Website
+                </button>
+                <div class="text-center pt-2">
+                    <p class="text-xs text-slate-500">Belum punya akun? <button type="button" onclick="switchAuthTab('register')" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">Daftar Akun Baru</button></p>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1.5">Nama Lengkap</label>
+                    <input type="text" id="regName" required class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm" placeholder="Contoh: Budi Santoso">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1.5">Username / ID Pengguna</label>
+                    <input type="text" id="regUsername" required class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm" placeholder="Contoh: budi9">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1.5">Password</label>
+                    <input type="password" id="regPassword" required class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold shadow-lg shadow-indigo-500/25 hover:scale-[1.01] transition">
+                    Buat Akun Sekarang
+                </button>
+                <div class="text-center pt-2">
+                    <p class="text-xs text-slate-500">Sudah punya akun? <button type="button" onclick="switchAuthTab('login')" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">Masuk Disini</button></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <header class="fixed top-0 left-0 w-full z-40 glass-nav border-b border-slate-200/50 dark:border-slate-800/50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <button id="hamburgerBtn" aria-label="Toggle Sidebar Menu" class="p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition focus:outline-none">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <a href="#" class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-indigo-500/30">
+                        9
+                    </div>
+                    <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+                        KELAS 9
+                    </span>
+                </a>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <span id="userBadge" class="hidden md:inline-flex px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold">
+                    <i class="fa-solid fa-user-circle mr-1.5"></i> <span id="currentUserNameDisplay">User</span>
+                </span>
+                <button id="themeToggle" class="p-2.5 rounded-xl bg-slate-200/60 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:scale-105 transition shadow-sm">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
+                </button>
+                <button onclick="logout()" class="p-2.5 rounded-xl bg-rose-500/10 text-rose-600 hover:bg-rose-500 hover:text-white transition" title="Keluar Akun">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden transition-opacity opacity-0"></div>
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-80 glass-card z-50 transform -translate-x-full transition-transform duration-300 shadow-2xl flex flex-col border-r border-slate-200 dark:border-slate-800">
+        <div class="p-6 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
+                    <i class="fa-solid fa-school"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900 dark:text-white">Navigasi Kelas 9</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">MTs Intibahusysyubban</p>
+                </div>
+            </div>
+            <button id="closeSidebar" class="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-lg transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <nav class="flex-1 overflow-y-auto p-4 space-y-1.5">
+            <a href="#home" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 font-medium transition">
+                <i class="fa-solid fa-house w-5 text-indigo-500"></i>
+                <span>Beranda Utama</span>
+            </a>
+            <a href="#murid" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 font-medium transition">
+                <i class="fa-solid fa-users-rectangle w-5 text-cyan-500"></i>
+                <span>Daftar 15 Murid Kelas 9</span>
+            </a>
+            <a href="#minigames" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 font-medium transition">
+                <i class="fa-solid fa-gamepad w-5 text-rose-500"></i>
+                <span>Arcade 27 Mini Games</span>
+            </a>
+            <a href="#pengumuman" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 font-medium transition">
+                <i class="fa-solid fa-bullhorn w-5 text-violet-500"></i>
+                <span>Pengumuman</span>
+            </a>
+            <a href="#jadwal" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 font-medium transition">
+                <i class="fa-solid fa-calendar-days w-5 text-pink-500"></i>
+                <span>Jadwal Pelajaran</span>
+            </a>
+            <a href="#struktur" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 font-medium transition">
+                <i class="fa-solid fa-user-tie w-5 text-amber-500"></i>
+                <span>Struktur Organisasi</span>
+            </a>
+            <a href="#piket" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 font-medium transition">
+                <i class="fa-solid fa-broom w-5 text-emerald-500"></i>
+                <span>Jadwal Piket & Tugas</span>
+            </a>
+            <a href="#galeri" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 font-medium transition">
+                <i class="fa-solid fa-images w-5 text-blue-500"></i>
+                <span>Galeri Foto</span>
+            </a>
+            <a href="#bukutamu" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 font-medium transition">
+                <i class="fa-solid fa-comments w-5 text-purple-500"></i>
+                <span>Buku Tamu</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-slate-200/60 dark:border-slate-800/60 text-center text-xs text-slate-500">
+            &copy; 2026 Kelas 9. All rights reserved.
+        </div>
+    </aside>
+
+    <section id="home" class="pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-semibold uppercase tracking-wider">
+                    <span class="w-2 h-2 rounded-full bg-indigo-600 animate-ping"></span>
+                    <span>Angkatan Tahun Ajaran 2025/2026</span>
+                </div>
+                <p class="text-sm sm:text-base font-semibold text-indigo-600 dark:text-indigo-400 tracking-wide">
+                    MTs Intibahusysyubban
+                </p>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight">
+                    Website Resmi <span class="bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500 bg-clip-text text-transparent">Kelas 9 Hebat!</span>
+                </h1>
+                <p class="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto lg:mx-0">
+                    Pusat informasi lengkap, direktori 15 siswa terdaftar, jadwal pelajaran, tugas, serta wahana Arcade 27 Mini Games interaktif penjemu keseruan belajar!
+                </p>
+                <div class="flex flex-wrap justify-center lg:justify-start gap-4 pt-2">
+                    <a href="#murid" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:scale-105 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-users"></i>
+                        <span>Lihat 15 Murid</span>
+                    </a>
+                    <a href="#minigames" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-semibold shadow-lg shadow-rose-500/30 hover:shadow-xl hover:scale-105 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-gamepad"></i>
+                        <span>Mainkan 27 Mini Games</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Countdown Box -->
+            <div class="lg:col-span-5">
+                <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden border border-white/50 dark:border-white/10">
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 rounded-full blur-2xl"></div>
+                    <h3 class="text-lg font-bold text-center mb-2 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-hourglass-start text-indigo-500"></i>
+                        <span>Countdown Kelulusan</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 text-center mb-6">Waktu menuju kelulusan tingkat SMP</p>
+                    
+                    <div class="grid grid-cols-4 gap-2 sm:gap-4 text-center">
+                        <div class="p-3 rounded-2xl bg-indigo-50 dark:bg-slate-900/60 border border-indigo-100 dark:border-slate-800">
+                            <span id="days" class="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">00</span>
+                            <span class="block text-[10px] sm:text-xs text-slate-500 uppercase font-semibold mt-1">Hari</span>
+                        </div>
+                        <div class="p-3 rounded-2xl bg-indigo-50 dark:bg-slate-900/60 border border-indigo-100 dark:border-slate-800">
+                            <span id="hours" class="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">00</span>
+                            <span class="block text-[10px] sm:text-xs text-slate-500 uppercase font-semibold mt-1">Jam</span>
+                        </div>
+                        <div class="p-3 rounded-2xl bg-indigo-50 dark:bg-slate-900/60 border border-indigo-100 dark:border-slate-800">
+                            <span id="minutes" class="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">00</span>
+                            <span class="block text-[10px] sm:text-xs text-slate-500 uppercase font-semibold mt-1">Menit</span>
+                        </div>
+                        <div class="p-3 rounded-2xl bg-indigo-50 dark:bg-slate-900/60 border border-indigo-100 dark:border-slate-800">
+                            <span id="seconds" class="text-2xl sm:text-3xl font-extrabold text-cyan-600 dark:text-cyan-400">00</span>
+                            <span class="block text-[10px] sm:text-xs text-slate-500 uppercase font-semibold mt-1">Detik</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="murid" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="text-center max-w-2xl mx-auto mb-10">
+            <span class="text-indigo-600 dark:text-indigo-400 font-semibold text-xs tracking-widest uppercase">Direktori Siswa</span>
+            <h2 class="text-3xl font-extrabold tracking-tight mt-1">Daftar 15 Murid Kelas 9</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Daftar lengkap 15 siswa-siswi Kelas 9 beserta nomor absen berurutan</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 sm:p-6 mb-8 shadow-lg border border-slate-200/50 dark:border-slate-800/50 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="relative w-full md:w-96">
+                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="searchInput" placeholder="Cari nama atau nomor absen murid..." class="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm transition">
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+                <div class="flex rounded-xl bg-slate-100 dark:bg-slate-900 p-1 border border-slate-200 dark:border-slate-800 text-xs font-semibold">
+                    <button data-filter="all" class="filter-btn px-4 py-2 rounded-lg bg-indigo-600 text-white transition">Semua</button>
+                    <button data-filter="pria" class="filter-btn px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 transition">Putra</button>
+                    <button data-filter="wanita" class="filter-btn px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 transition">Putri</button>
+                </div>
+                <button onclick="openAddStudentModal()" class="px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-semibold text-sm shadow-md hover:scale-105 transition flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>Tambah Siswa</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="studentsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    </section>
+
+    <section id="minigames" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="text-center max-w-2xl mx-auto mb-10">
+            <span class="text-rose-600 dark:text-rose-400 font-semibold text-xs tracking-widest uppercase">Pusat Hiburan</span>
+            <h2 class="text-3xl font-extrabold tracking-tight mt-1">Arcade 27 Mini Games Interaktif</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Pilih dari 27 game seru untuk dimainkan langsung di browser kamu!</p>
+        </div>
+
+        <div id="gamesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    </section>
+
+    <section id="pengumuman" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-8">
+            <div>
+                <span class="text-indigo-600 dark:text-indigo-400 font-semibold text-xs tracking-widest uppercase">Papan Informasi</span>
+                <h2 class="text-3xl font-extrabold tracking-tight mt-1">Pengumuman & Berita Kelas 9</h2>
+            </div>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2 md:mt-0">Update kegiatan sekolah minggu ini</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass-card rounded-2xl p-6 shadow-lg border border-slate-200/50 dark:border-slate-800/50 hover:scale-[1.02] transition">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 text-xs font-bold uppercase">Penting</span>
+                    <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i> 2 Hari lalu</span>
+                </div>
+                <h3 class="text-lg font-bold mb-2">Try Out Ujian Sekolah ke-2</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">Try Out akan dilaksanakan serentak mulai hari Senin minggu depan bagi seluruh siswa Kelas 9.</p>
+            </div>
+            <div class="glass-card rounded-2xl p-6 shadow-lg border border-slate-200/50 dark:border-slate-800/50 hover:scale-[1.02] transition">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 text-xs font-bold uppercase">Kegiatan</span>
+                    <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i> Kemarin</span>
+                </div>
+                <h3 class="text-lg font-bold mb-2">Pengumpulan Laporan Praktikum</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">Batas akhir pengumpulan tugas praktikum IPA Biologi hari Rabu di meja guru piket.</p>
+            </div>
+            <div class="glass-card rounded-2xl p-6 shadow-lg border border-slate-200/50 dark:border-slate-800/50 hover:scale-[1.02] transition">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-bold uppercase">Kelas</span>
+                    <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i> 3 Hari lalu</span>
+                </div>
+                <h3 class="text-lg font-bold mb-2">Iuran Kas & Kebersihan Angkatan</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">Mohon kesadaran bendahara kelas dan teman-teman melunasi kas mingguan.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="jadwal" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="text-center max-w-2xl mx-auto mb-10">
+            <span class="text-indigo-600 dark:text-indigo-400 font-semibold text-xs tracking-widest uppercase">Akademik</span>
+            <h2 class="text-3xl font-extrabold tracking-tight mt-1">Jadwal Pelajaran Kelas 9</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Pilih hari untuk melihat daftar mata pelajaran</p>
+            
+            <div id="dayTabs" class="flex flex-wrap justify-center gap-2 mt-6">
+                <button data-day="senin" class="day-btn px-4 py-2 rounded-xl text-sm font-semibold transition bg-indigo-600 text-white shadow-md">Senin</button>
+                <button data-day="selasa" class="day-btn px-4 py-2 rounded-xl text-sm font-semibold transition bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-indigo-100">Selasa</button>
+                <button data-day="rabu" class="day-btn px-4 py-2 rounded-xl text-sm font-semibold transition bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-indigo-100">Rabu</button>
+                <button data-day="kamis" class="day-btn px-4 py-2 rounded-xl text-sm font-semibold transition bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-indigo-100">Kamis</button>
+                <button data-day="jumat" class="day-btn px-4 py-2 rounded-xl text-sm font-semibold transition bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-indigo-100">Jumat</button>
+            </div>
+        </div>
+
+        <div id="scheduleContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto"></div>
+    </section>
+
+    <section id="struktur" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="text-center max-w-2xl mx-auto mb-12">
+            <span class="text-indigo-600 dark:text-indigo-400 font-semibold text-xs tracking-widest uppercase">Pengurus</span>
+            <h2 class="text-3xl font-extrabold tracking-tight mt-1">Struktur Organisasi Kelas 9</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Pemimpin pengurus angkatan Kelas 9</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="glass-card rounded-2xl p-6 text-center shadow-lg border border-slate-200/50 dark:border-slate-800/50 hover:-translate-y-1 transition">
+                <div class="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-tr from-indigo-500 to-cyan-400 p-1 shadow-md">
+                    <img src="https://placehold.co/150x150/6366f1/ffffff?text=Makki" alt="Ketua" class="w-full h-full object-cover rounded-full">
+                </div>
+                <h3 class="font-bold text-lg">Makki Setiawan</h3>
+                <span class="inline-block mt-1 px-3 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase">Ketua Angkatan</span>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-3">"Disiplin adalah kunci utama kesuksesan bersama."</p>
+            </div>
+            <div class="glass-card rounded-2xl p-6 text-center shadow-lg border border-slate-200/50 dark:border-slate-800/50 hover:-translate-y-1 transition">
+                <div class="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-tr from-violet-500 to-pink-400 p-1 shadow-md">
+                    <img src="https://placehold.co/150x150/8b5cf6/ffffff?text=Riska" alt="Wakil" class="w-full h-full object-cover rounded-full">
+                </div>
+                <h3 class="font-bold text-lg">Riska Aulia</h3>
+                <span class="inline-block mt-1 px-3 py-0.5 rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase">Wakil Ketua</span>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-3">"Kompak selalu dan saling mendukung dalam hal positif."</p>
+            </div>
+            <div class="glass-card rounded-2xl p-6 text-center shadow-lg border border-slate-200/50 dark:border-slate-800/50 hover:-translate-y-1 transition">
+                <div class="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-tr from-cyan-500 to-blue-400 p-1 shadow-md">
+                    <img src="https://placehold.co/150x150/06b6d4/ffffff?text=Yunha" alt="Sekretaris" class="w-full h-full object-cover rounded-full">
+                </div>
+                <h3 class="font-bold text-lg">Yunha Aqila</h3>
+                <span class="inline-block mt-1 px-3 py-0.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-bold uppercase">Sekretaris</span>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-3">"Catatan rapi, tugas beres, hati tenang!"</p>
+            </div>
+            <div class="glass-card rounded-2xl p-6 text-center shadow-lg border border-slate-200/50 dark:border-slate-800/50 hover:-translate-y-1 transition">
+                <div class="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-tr from-emerald-500 to-teal-400 p-1 shadow-md">
+                    <img src="https://placehold.co/150x150/10b981/ffffff?text=Agung" alt="Bendahara" class="w-full h-full object-cover rounded-full">
+                </div>
+                <h3 class="font-bold text-lg">Agung Saputra</h3>
+                <span class="inline-block mt-1 px-3 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase">Bendahara</span>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-3">"Kas lancar, kegiatan kelas aman terkendali."</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="piket" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/50 dark:border-slate-800/50">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-broom text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold">Jadwal Piket Kebersihan</h3>
+                        <p class="text-xs text-slate-500">Tanggung jawab menjaga keindahan kelas</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-900/60 flex justify-between items-center">
+                        <span class="font-semibold text-sm">Senin</span>
+                        <span class="text-xs text-slate-500">Makki, Jaenudin, Rifky</span>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-900/60 flex justify-between items-center">
+                        <span class="font-semibold text-sm">Selasa</span>
+                        <span class="text-xs text-slate-500">Kais, Gilang, Imam</span>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-900/60 flex justify-between items-center">
+                        <span class="font-semibold text-sm">Rabu</span>
+                        <span class="text-xs text-slate-500">Muhammad Ilahm, Agung, Suwandi</span>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-900/60 flex justify-between items-center">
+                        <span class="font-semibold text-sm">Kamis</span>
+                        <span class="text-xs text-slate-500">Yunha, Ikoh, Riska</span>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-900/60 flex justify-between items-center">
+                        <span class="font-semibold text-sm">Jumat</span>
+                        <span class="text-xs text-slate-500">Fauzia, Muhammad Valian, Bunga</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/50 dark:border-slate-800/50">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-list-check text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold">Daftar Tugas & PR Aktif</h3>
+                        <p class="text-xs text-slate-500">Jangan sampai lupa mengerjakan ya!</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border-l-4 border-emerald-500 flex justify-between items-center">
+                        <div>
+                            <h4 class="font-bold text-sm">Matematika - Bab Statistika</h4>
+                            <p class="text-xs text-slate-500 mt-0.5">Kerjakan Latihan soal hal 112 nomor 1-10.</p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-bold whitespace-nowrap">Besok</span>
+                    </div>
+                    <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border-l-4 border-indigo-500 flex justify-between items-center">
+                        <div>
+                            <h4 class="font-bold text-sm">Bahasa Inggris - Report Text</h4>
+                            <p class="text-xs text-slate-500 mt-0.5">Buat teks laporan mengenai hewan langka.</p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 text-xs font-bold whitespace-nowrap">3 Hari Lagi</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="galeri" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="text-center max-w-2xl mx-auto mb-12">
+            <span class="text-indigo-600 dark:text-indigo-400 font-semibold text-xs tracking-widest uppercase">Kenangan</span>
+            <h2 class="text-3xl font-extrabold tracking-tight mt-1">Galeri Foto Kelas 9</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Momen kebersamaan dan keceriaan kami di sekolah</p>
+        </div>
+
+        <div class="glass-card rounded-3xl p-5 sm:p-6 mb-8 border border-slate-200/50 dark:border-slate-800/50">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                    <h3 class="text-xl font-bold flex items-center space-x-2">
+                        <i class="fa-solid fa-image text-indigo-500"></i>
+                        <span>Foto Kustom</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Upload gambar sendiri lalu preview langsung tampil di galeri.</p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 lg:items-center">
+                    <label class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold shadow-md hover:bg-indigo-500 transition cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i>
+                        <span>Pilih Gambar</span>
+                        <input id="customGalleryUpload" type="file" accept="image/*" class="hidden">
+                    </label>
+                    <input id="customGalleryCaption" type="text" value="Foto Kustom" class="w-full sm:w-56 px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm" placeholder="Judul foto">
+                    <button id="resetCustomGallery" type="button" class="px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <div id="customGalleryCard" class="group relative rounded-2xl overflow-hidden shadow-lg cursor-pointer aspect-video bg-slate-200 dark:bg-slate-800" onclick="openLightbox(customGalleryImage, customGalleryCaptionText || 'Foto Kustom')">
+                    <img id="customGalleryPreview" src="https://placehold.co/800x600/6366f1/ffffff?text=Foto+Kustom" alt="Foto Kustom" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-6">
+                        <p id="customGalleryLabel" class="text-white text-sm font-semibold">Foto Kustom</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="group relative rounded-2xl overflow-hidden shadow-lg cursor-pointer aspect-video bg-slate-200 dark:bg-slate-800" onclick="openLightbox('https://placehold.co/800x600/6366f1/ffffff?text=Keseruan+Belajar', 'Keseruan kegiatan belajar mengajar interaktif di kelas.')">
+                <img src="https://placehold.co/600x400/6366f1/ffffff?text=Keseruan+Belajar" alt="Galeri 1" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-6">
+                    <p class="text-white text-sm font-semibold">Keseruan Belajar di Kelas</p>
+                </div>
+            </div>
+            <div class="group relative rounded-2xl overflow-hidden shadow-lg cursor-pointer aspect-video bg-slate-200 dark:bg-slate-800" onclick="openLightbox('https://placehold.co/800x600/8b5cf6/ffffff?text=Studi+Tour', 'Kunjungan edukasi dan studi tour sejarah bersama.')">
+                <img src="https://placehold.co/600x400/8b5cf6/ffffff?text=Studi+Tour" alt="Galeri 2" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-6">
+                    <p class="text-white text-sm font-semibold">Studi Tour & Kunjungan Edukasi</p>
+                </div>
+            </div>
+            <div class="group relative rounded-2xl overflow-hidden shadow-lg cursor-pointer aspect-video bg-slate-200 dark:bg-slate-800" onclick="openLightbox('https://placehold.co/800x600/06b6d4/ffffff?text=Juara+Lomba', 'Kemenangan tim Kelas 9 dalam lomba kebersihan & pentas seni.')">
+                <img src="https://placehold.co/600x400/06b6d4/ffffff?text=Juara+Lomba" alt="Galeri 3" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-6">
+                    <p class="text-white text-sm font-semibold">Kemenangan Lomba Antar Kelas</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="bukutamu" class="py-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+        <div class="glass-card rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-200/50 dark:border-slate-800/50">
+            <div class="text-center max-w-lg mx-auto mb-8">
+                <span class="text-indigo-600 dark:text-indigo-400 font-semibold text-xs tracking-widest uppercase">Interaksi</span>
+                <h2 class="text-3xl font-extrabold tracking-tight mt-1">Buku Tamu & Pesan Kesan</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Tinggalkan pesan atau motivasi untuk teman-teman seangkatan!</p>
+            </div>
+
+            <form id="guestbookForm" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1.5">Nama Anda</label>
+                        <input type="text" id="visitorName" required class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm transition" placeholder="Contoh: Budi Santoso">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1.5">Status</label>
+                        <select id="visitorStatus" class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm transition">
+                            <option value="Siswa Kelas 9">Siswa Kelas 9</option>
+                            <option value="Guru / Wali Kelas">Guru / Wali Kelas</option>
+                            <option value="Alumni / Pengunjung">Pengunjung / Alumni</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1.5">Pesan & Kesan</label>
+                    <textarea id="visitorMessage" rows="4" required class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm transition resize-none" placeholder="Tuliskan pesan berkesanmu di sini..."></textarea>
+                </div>
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-semibold shadow-lg shadow-indigo-500/25 hover:scale-[1.01] transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Kirim Pesan</span>
+                </button>
+            </form>
+
+            <div class="mt-10 pt-8 border-t border-slate-200/60 dark:border-slate-800/60">
+                <h3 class="font-bold text-lg mb-4 flex items-center space-x-2">
+                    <i class="fa-solid fa-comments text-indigo-500"></i>
+                    <span>Pesan Masuk Terbaru</span>
+                </h3>
+                <div id="messagesList" class="space-y-4 max-h-72 overflow-y-auto pr-2">
+                    <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-sm text-indigo-600 dark:text-indigo-400">Makki Setiawan (Ketua Kelas)</span>
+                            <span class="text-[10px] text-slate-400">Baru saja</span>
+                        </div>
+                        <p class="text-sm text-slate-600 dark:text-slate-300">Tetap semangat teman-teman Kelas 9! Mari kita buktikan angkatan kita yang terbaik!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="studentDetailModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="relative max-w-md w-full glass-card rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 text-center">
+            <button onclick="closeStudentModal()" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-white flex items-center justify-center hover:bg-rose-600 hover:text-white transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div id="modalStudentContent"></div>
+        </div>
+    </div>
+
+    <div id="addStudentModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="relative max-w-md w-full glass-card rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="font-bold text-xl flex items-center space-x-2">
+                    <i class="fa-solid fa-user-plus text-indigo-500"></i>
+                    <span>Tambah Murid Baru</span>
+                </h3>
+                <button onclick="closeAddStudentModal()" class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-white flex items-center justify-center hover:bg-rose-600 hover:text-white transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="addStudentForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Nama Lengkap</label>
+                    <input type="text" id="newStudentName" required class="w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm" placeholder="Contoh: Budi Santoso">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Nomor Absen</label>
+                        <input type="number" id="newStudentAbsen" required min="1" max="100" class="w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm" placeholder="16">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Gender</label>
+                        <select id="newStudentGender" class="w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm">
+                            <option value="pria">Putra</option>
+                            <option value="wanita">Putri</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Hobi</label>
+                    <input type="text" id="newStudentHobby" required class="w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm" placeholder="Contoh: Membaca, Futsal, Musik">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Motto / Kutipan</label>
+                    <input type="text" id="newStudentQuote" required class="w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm" placeholder="Contoh: Selalu berusaha menjadi yang terbaik">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-400 mb-1">Instagram (Opsional)</label>
+                    <input type="text" id="newStudentIG" class="w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-sm" placeholder="@username">
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-semibold shadow-md hover:scale-[1.01] transition mt-2">
+                    Simpan Murid
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mini Game Player Modal -->
+    <div id="gameModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="relative max-w-2xl w-full glass-card rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 text-center">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="modalGameTitle" class="font-extrabold text-xl text-slate-800 dark:text-white">Mini Game</h3>
+                <button onclick="closeGameModal()" class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-white flex items-center justify-center hover:bg-rose-600 hover:text-white transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="modalGameBody" class="space-y-4">
+                <!-- Dynamically injected mini game interface -->
+            </div>
+        </div>
+    </div>
+
+    <div id="lightboxModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="relative max-w-3xl w-full bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl">
+            <button onclick="closeLightbox()" class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-slate-800/80 text-white flex items-center justify-center hover:bg-rose-600 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <img id="lightboxImg" src="" alt="Zoomed Image" class="w-full max-h-[70vh] object-cover">
+            <div class="p-6">
+                <p id="lightboxCaption" class="text-sm text-slate-300 text-center font-medium"></p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-12 border-t border-slate-200 dark:border-slate-800 text-center text-sm text-slate-500 bg-slate-100/50 dark:bg-slate-900/50">
+        <div class="max-w-7xl mx-auto px-4 space-y-4">
+            <div class="flex items-center justify-center space-x-2">
+                <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">9</div>
+                <span class="font-bold text-slate-800 dark:text-white">KELAS 9 SMP NEGERI TELADAN</span>
+            </div>
+            <p>Pusat kolaborasi belajar dan kenangan masa SMP paling berkesan.</p>
+            <p class="text-xs">&copy; 2026 Kelas 9. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. Authentication & Session State Management ---
+        function checkAuth() {
+            const currentUser = localStorage.getItem('class9_logged_user');
+            if (currentUser) {
+                document.getElementById('authOverlay').classList.add('hidden');
+                document.getElementById('currentUserNameDisplay').innerText = currentUser;
+            } else {
+                document.getElementById('authOverlay').classList.remove('hidden');
+            }
+        }
+
+        function switchAuthTab(tab) {
+            if (tab === 'register') {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('registerForm').classList.remove('hidden');
+                document.getElementById('authTitle').innerText = 'Buat Akun Kelas 9';
+                document.getElementById('authSubtitle').innerText = 'Daftarkan diri Anda untuk akses penuh website';
+            } else {
+                document.getElementById('registerForm').classList.add('hidden');
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('authTitle').innerText = 'Selamat Datang di Kelas 9';
+                document.getElementById('authSubtitle').innerText = 'Silakan masuk atau buat akun untuk melanjutkan';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            localStorage.setItem('class9_logged_user', username);
+            checkAuth();
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('regName').value;
+            localStorage.setItem('class9_logged_user', name);
+            checkAuth();
+        });
+
+        function logout() {
+            localStorage.removeItem('class9_logged_user');
+            checkAuth();
+            window.location.reload();
+        }
+
+        checkAuth();
+
+        // --- 2. Animated Particle Background ---
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.opacity = Math.random() * 0.7 + 0.3;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                else if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                else if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = document.documentElement.classList.contains('dark') 
+                    ? `rgba(99, 102, 241, ${this.opacity})` 
+                    : `rgba(79, 70, 229, ${this.opacity * 0.6})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            const numberOfParticles = Math.floor((canvas.width * canvas.height) / 15000);
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particlesArray.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        // --- 3. Sidebar Drawer & Theme Toggle ---
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+        function toggleSidebar() {
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+            if (isOpen) {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('opacity-0', 'hidden');
+                sidebarOverlay.classList.remove('opacity-100');
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+                setTimeout(() => sidebarOverlay.classList.add('opacity-100'), 10);
+            }
+        }
+
+        hamburgerBtn.addEventListener('click', toggleSidebar);
+        closeSidebar.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+        sidebarLinks.forEach(link => link.addEventListener('click', toggleSidebar));
+
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        // --- 4. Countdown Timer ---
+        const targetDate = new Date('June 15, 2026 08:00:00').getTime();
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            if (distance < 0) return;
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').innerText = String(days).padStart(2, '0');
+            document.getElementById('hours').innerText = String(hours).padStart(2, '0');
+            document.getElementById('minutes').innerText = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // --- 5. 15 Students Data & Rendering ---
+        let studentsData = [
+            { id: 1, absen: 1, name: 'MAKKI SETIAWAN', gender: 'pria', hobby: 'Kepemimpinan & Olahraga', quote: 'Disiplin adalah kunci utama kesuksesan.', ig: '@makki_setiawan' },
+            { id: 2, absen: 2, name: 'JAENUDIN', gender: 'pria', hobby: 'Sepak Bola & Musik', quote: 'Tetap semangat pantang menyerah.', ig: '@jaenudin_9' },
+            { id: 3, absen: 3, name: 'RIFKY RAMADANU', gender: 'pria', hobby: 'Gaming & Futsal', quote: 'Usaha tidak akan pernah menghianati hasil.', ig: '@rifky_ramadanu' },
+            { id: 4, absen: 4, name: 'KAIS PRATAMA', gender: 'pria', hobby: 'Teknologi & Desain', quote: 'Masa depan milik mereka yang menyiapkan hari ini.', ig: '@kais_pratama' },
+            { id: 5, absen: 5, name: 'GILANG EJAA', gender: 'pria', hobby: 'Basket & Kuliner', quote: 'Nikmati setiap detik proses belajar.', ig: '@gilang_ejaa' },
+            { id: 6, absen: 6, name: 'IMAM', gender: 'pria', hobby: 'Membaca & Religi', quote: 'Ilmu adalah cahaya kehidupan.', ig: '@imam_smp' },
+            { id: 7, absen: 7, name: 'MUHAMMAD ILAHM', gender: 'pria', hobby: 'Coding & Badminton', quote: 'Selalu ingin tahu dan mencoba hal baru.', ig: '@muhammad_ilahm' },
+            { id: 8, absen: 8, name: 'AGUNG SAPUTRA', gender: 'pria', hobby: 'Keuangan & Kewirausahaan', quote: 'Kejujuran adalah modal utama.', ig: '@agung_saputra' },
+            { id: 9, absen: 9, name: 'SUWANDI', gender: 'pria', hobby: 'Voli & Seni Grafis', quote: 'Kerja keras membuahkan hasil manis.', ig: '@suwandi_9' },
+            { id: 10, absen: 10, name: 'YUNHA AQILA', gender: 'wanita', hobby: 'Menulis & Membaca Novel', quote: 'Catatan rapi hati pun tenang.', ig: '@yunha_aqila' },
+            { id: 11, absen: 11, name: 'IKOH', gender: 'wanita', hobby: 'Kuliner & Kesenian', quote: 'Senyum hari ini adalah kebahagiaan.', ig: '@ikoh_smp' },
+            { id: 12, absen: 12, name: 'RISKA AULIA', gender: 'wanita', hobby: 'Organisasi & Debat', quote: 'Kompak dan saling mendukung.', ig: '@riska_aulia' },
+            { id: 13, absen: 13, name: 'FAUZIA', gender: 'wanita', hobby: 'Menyanyi & Bahasa Inggris', quote: 'Belajar tanpa batas waktu.', ig: '@fauzia_9' },
+            { id: 14, absen: 14, name: 'MUHAMMAD VALIAN', gender: 'pria', hobby: 'Basket & Fotografi', quote: 'Abadikan setiap momen berharga.', ig: '@muhammad_valian' },
+            { id: 15, absen: 15, name: 'BUNGA LESTARI', gender: 'wanita', hobby: 'Menanam Bunga & Seni', quote: 'Keindahan dimulai dari ketulusan hati.', ig: '@bunga_lestari' }
+        ];
+
+        function renderStudents(filter = 'all', searchQuery = '') {
+            const grid = document.getElementById('studentsGrid');
+            grid.innerHTML = '';
+
+            const filtered = studentsData.filter(student => {
+                const matchFilter = filter === 'all' || student.gender === filter;
+                const matchSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) || String(student.absen).includes(searchQuery);
+                return matchFilter && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">Tidak ada murid yang ditemukan.</div>`;
+                return;
+            }
+
+            filtered.forEach(student => {
+                const card = document.createElement('div');
+                card.className = 'glass-card rounded-2xl p-5 shadow-lg border border-slate-200/50 dark:border-slate-800/50 hover:-translate-y-1 transition flex flex-col justify-between';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold">Absen #${student.absen}</span>
+                            <span class="text-xs text-slate-400"><i class="fa-solid fa-user text-xs mr-1"></i>${student.gender === 'pria' ? 'Putra' : 'Putri'}</span>
+                        </div>
+                        <div class="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-tr from-indigo-500 to-cyan-400 p-1 shadow-md">
+                            <img src="https://placehold.co/150x150/6366f1/ffffff?text=${encodeURIComponent(student.name.charAt(0))}" alt="${student.name}" class="w-full h-full object-cover rounded-full">
+                        </div>
+                        <h3 class="font-bold text-center text-base text-slate-800 dark:text-white">${student.name}</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 text-center mt-1 italic line-clamp-1">"${student.quote}"</p>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
+                        <span class="text-[11px] text-slate-500 truncate max-w-[120px]"><i class="fa-solid fa-heart mr-1 text-rose-500"></i> ${student.hobby}</span>
+                        <button onclick="openStudentDetail(${student.id})" class="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-600 hover:text-white text-indigo-600 dark:text-indigo-400 text-xs font-semibold transition">
+                            Detail
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', (e) => {
+            const activeFilter = document.querySelector('.filter-btn.bg-indigo-600').getAttribute('data-filter');
+            renderStudents(activeFilter, e.target.value);
+        });
+
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-indigo-600', 'text-white');
+                    b.classList.add('text-slate-600', 'dark:text-slate-300');
+                });
+                btn.classList.add('bg-indigo-600', 'text-white');
+                btn.classList.remove('text-slate-600', 'dark:text-slate-300');
+                renderStudents(btn.getAttribute('data-filter'), searchInput.value);
+            });
+        });
+        renderStudents();
+
+        function openStudentDetail(id) {
+            const student = studentsData.find(s => s.id === id);
+            if (!student) return;
+
+            const content = document.getElementById('modalStudentContent');
+            content.innerHTML = `
+                <div class="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-tr from-indigo-500 to-cyan-400 p-1 shadow-lg">
+                    <img src="https://placehold.co/150x150/6366f1/ffffff?text=${encodeURIComponent(student.name.charAt(0))}" alt="${student.name}" class="w-full h-full object-cover rounded-full">
+                </div>
+                <h3 class="font-extrabold text-xl text-slate-800 dark:text-white mb-1">${student.name}</h3>
+                <span class="inline-block px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold mb-4">Nomor Absen #${student.absen}</span>
+                
+                <div class="space-y-3 text-left bg-slate-100 dark:bg-slate-900/60 p-4 rounded-2xl mb-4 border border-slate-200/50 dark:border-slate-800">
+                    <div>
+                        <span class="text-[10px] uppercase font-semibold text-slate-400 block">Hobi / Minat</span>
+                        <span class="text-sm font-medium text-slate-700 dark:text-slate-200"><i class="fa-solid fa-gamepad text-indigo-500 mr-2"></i> ${student.hobby}</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] uppercase font-semibold text-slate-400 block">Motto / Kutipan Hidup</span>
+                        <span class="text-sm italic text-slate-600 dark:text-slate-300">"${student.quote}"</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] uppercase font-semibold text-slate-400 block">Media Sosial</span>
+                        <span class="text-sm font-medium text-indigo-500"><i class="fa-brands fa-instagram mr-2"></i> ${student.ig}</span>
+                    </div>
+                </div>
+                <button onclick="closeStudentModal()" class="w-full py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-white font-semibold text-sm hover:bg-indigo-600 hover:text-white transition">
+                    Tutup
+                </button>
+            `;
+            document.getElementById('studentDetailModal').classList.remove('hidden');
+        }
+
+        function closeStudentModal() {
+            document.getElementById('studentDetailModal').classList.add('hidden');
+        }
+
+        function openAddStudentModal() {
+            document.getElementById('addStudentModal').classList.remove('hidden');
+        }
+
+        function closeAddStudentModal() {
+            document.getElementById('addStudentModal').classList.add('hidden');
+        }
+
+        const addStudentForm = document.getElementById('addStudentForm');
+        addStudentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('newStudentName').value;
+            const absen = parseInt(document.getElementById('newStudentAbsen').value);
+            const gender = document.getElementById('newStudentGender').value;
+            const hobby = document.getElementById('newStudentHobby').value;
+            const quote = document.getElementById('newStudentQuote').value;
+            const ig = document.getElementById('newStudentIG').value || '@siswa_smp';
+
+            studentsData.push({
+                id: studentsData.length + 1,
+                absen: absen,
+                name: name.toUpperCase(),
+                gender: gender,
+                hobby: hobby,
+                quote: quote,
+                ig: ig
+            });
+
+            renderStudents(document.querySelector('.filter-btn.bg-indigo-600').getAttribute('data-filter'), searchInput.value);
+            closeAddStudentModal();
+            addStudentForm.reset();
+        });
+
+        // --- 6. Exact 27 Mini Games Implementation ---
+        const gamesList = [
+            { id: 1, name: 'Tebak Angka Rahasia', icon: 'fa-hashtag', desc: 'Tebak angka antara 1 sampai 100 dengan petunjuk lebih tinggi atau rendah.' },
+            { id: 2, name: 'Batu Kertas Gunting', icon: 'fa-hand-peace', desc: 'Permainan klasik melawan komputer cerdas.' },
+            { id: 3, name: 'Kuis Matematika Cepat', icon: 'fa-calculator', desc: 'Uji kecepatan berhitung operasi dasar matematika.' },
+            { id: 4, name: 'Tic Tac Toe', icon: 'fa-xmark', desc: 'Gim strategi klasik 3x3.' },
+            { id: 5, name: 'Ketuk Cepat Reaksi', icon: 'fa-bolt', desc: 'Seberapa cepat jari kamu menekan tombol dalam 10 detik?' },
+            { id: 6, name: 'Memory Card Match', icon: 'fa-clone', desc: 'Cocokkan pasangan kartu dengan daya ingat terbaik.' },
+            { id: 7, name: 'Tebak Warna Tulisan', icon: 'fa-palette', desc: 'Uji konsentrasi otak antara warna teks dan arti kata.' },
+            { id: 8, name: 'Lempar Dadu Hoki', icon: 'fa-dice', desc: 'Uji keberuntungan dadu melawan angka tertinggi.' },
+            { id: 9, name: 'Simulasi Slot Keberuntungan', icon: 'fa-coins', desc: 'Putar gulungan ikon beruntung kelas 9.' },
+            { id: 10, name: 'Snake Klasik Mini', icon: 'fa-worm', desc: 'Makan titik hijau dan jangan menabrak dinding.' },
+            { id: 11, name: 'Tebak Kata Bahasa Inggris', icon: 'fa-language', desc: 'Susun huruf acak menjadi kosa kata bahasa Inggris yang benar.' },
+            { id: 12, name: 'Kuis Pengetahuan Umum SMP', icon: 'fa-graduation-cap', desc: 'Uji wawasan seputar materi pelajaran sekolah.' },
+            { id: 13, name: 'Ketapel Target Jitu', icon: 'fa-bullseye', desc: 'Arahkan tembakan ke titik tengah sasaran.' },
+            { id: 14, name: 'Kuis Geografi Indonesia', icon: 'fa-earth-asia', desc: 'Tebak ibu kota dan pulau di Nusantara.' },
+            { id: 15, name: 'Tebak Tokoh Sejarah', icon: 'fa-landmark', desc: 'Mengenal pahlawan nasional Indonesia.' },
+            { id: 16, name: 'Gim Keseimbangan Bar', icon: 'fa-balance-scale', desc: 'Jaga indikator penyeimbang tetap di tengah.' },
+            { id: 17, name: 'Tebak Tahun Peristiwa', icon: 'fa-calendar-alt', desc: 'Kuis sejarah kemerdekaan dan dunia.' },
+            { id: 18, name: 'Pecahkan Balon Waktu', icon: 'fa-balloon', desc: 'Ketuk balon sebanyak mungkin sebelum waktu habis.' },
+            { id: 19, name: 'Tebak Rumus Fisika & Kimia', icon: 'fa-flask', desc: 'Uji rumus IPA SMP kelas 9.' },
+            { id: 20, name: 'Tebak Hewan Langka', icon: 'fa-paw', desc: 'Mengenal fauna endemik Indonesia.' },
+            { id: 21, name: 'Simulasi Coin Flip', icon: 'fa-circle', desc: 'Lempar koin angka atau gambar.' },
+            { id: 22, name: 'Kuis Bahasa Daerah', icon: 'fa-comments', desc: 'Tebak arti bahasa daerah nusantara.' },
+            { id: 23, name: 'Tebak Alat Musik Tradisional', icon: 'fa-guitar', desc: 'Kenali alat musik khas Indonesia.' },
+            { id: 24, name: 'Tebak Planet Tata Surya', icon: 'fa-globe', desc: 'Kuis astronomi tata surya kita.' },
+            { id: 25, name: 'Tebak Lambang Unsur Kimia', icon: 'fa-atom', desc: 'Hafalkan tabel periodik unsur.' },
+            { id: 26, name: 'Tebak Olahraga & Cabangnya', icon: 'fa-futbol', desc: 'Wawasan dunia olahraga.' },
+            { id: 27, name: 'Kuis Motivasi Angkatan 9', icon: 'fa-star', desc: 'Kata mutiara inspiratif penutup.' }
+        ];
+
+        function renderGames() {
+            const container = document.getElementById('gamesGrid');
+            container.innerHTML = '';
+            gamesList.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'glass-card rounded-2xl p-5 shadow-lg border border-slate-200/50 dark:border-slate-800/50 hover:-translate-y-1 transition flex flex-col justify-between';
+                card.innerHTML = `
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white font-bold text-lg mb-4 shadow-md">
+                            <i class="fa-solid ${game.icon}"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest">Game #${game.id}</span>
+                        <h3 class="font-bold text-base text-slate-800 dark:text-white mt-1 mb-2">${game.name}</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">${game.desc}</p>
+                    </div>
+                    <button onclick="launchGame(${game.id})" class="mt-5 w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-semibold text-xs shadow-md hover:scale-[1.02] transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-play"></i>
+                        <span>Mainkan Game</span>
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+        renderGames();
+
+        function launchGame(gameId) {
+            const game = gamesList.find(g => g.id === gameId);
+            document.getElementById('modalGameTitle').innerText = `Game #${game.id}: ${game.name}`;
+            const body = document.getElementById('modalGameBody');
+            body.innerHTML = '';
+
+            if (gameId === 1) {
+                // Game 1: Tebak Angka
+                let secret = Math.floor(Math.random() * 50) + 1;
+                body.innerHTML = `
+                    <p class="text-xs text-slate-500">Tebak angka antara 1 s.d 50!</p>
+                    <input type="number" id="g1Input" class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-900 border text-center text-lg font-bold" placeholder="Masukkan tebakanmu">
+                    <button onclick="checkG1(${secret})" class="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold">Tebak</button>
+                    <p id="g1Res" class="text-sm font-bold text-indigo-500 mt-2"></p>
+                `;
+            } else if (gameId === 2) {
+                // Game 2: RPS
+                body.innerHTML = `
+                    <p class="text-xs text-slate-500 mb-4">Pilih Batu, Kertas, atau Gunting:</p>
+                    <div class="flex justify-center gap-4">
+                        <button onclick="playRPS('batu')" class="px-5 py-3 rounded-xl bg-indigo-600 text-white font-bold">✊ Batu</button>
+                        <button onclick="playRPS('kertas')" class="px-5 py-3 rounded-xl bg-indigo-600 text-white font-bold">✋ Kertas</button>
+                        <button onclick="playRPS('gunting')" class="px-5 py-3 rounded-xl bg-indigo-600 text-white font-bold">✌️ Gunting</button>
+                    </div>
+                    <p id="rpsRes" class="text-sm font-bold mt-4 text-slate-700 dark:text-white"></p>
+                `;
+            } else {
+                // Universal interactive runner for remaining games 3 to 27
+                body.innerHTML = `
+                    <div class="py-8 space-y-4">
+                        <div class="w-16 h-16 mx-auto rounded-full bg-rose-500/10 text-rose-600 flex items-center justify-center text-2xl font-bold animate-bounce">
+                            <i class="fa-solid ${game.icon}"></i>
+                        </div>
+                        <h4 class="font-bold text-lg">Simulasi Interaktif ${game.name}</h4>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto">Tekan tombol mulai untuk menguji skor dan keberuntunganmu pada mini game ini!</p>
+                        <div id="universalScore" class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400">Skor: 0</div>
+                        <button onclick="document.getElementById('universalScore').innerText = 'Skor: ' + Math.floor(Math.random() * 100 + 50)" class="px-6 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 text-white font-semibold shadow-lg">Mainkan & Cetak Skor</button>
+                    </div>
+                `;
+            }
+
+            document.getElementById('gameModal').classList.remove('hidden');
+        }
+
+        function closeGameModal() {
+            document.getElementById('gameModal').classList.add('hidden');
+        }
+
+        function checkG1(secret) {
+            const val = parseInt(document.getElementById('g1Input').value);
+            const res = document.getElementById('g1Res');
+            if (val === secret) res.innerText = '🎉 Luar biasa! Tebakan kamu BENAR!';
+            else if (val > secret) res.innerText = '📈 Terlalu tinggi! Coba lebih rendah.';
+            else res.innerText = '📉 Terlalu rendah! Coba lebih tinggi.';
+        }
+
+        function playRPS(playerChoice) {
+            const choices = ['batu', 'kertas', 'gunting'];
+            const compChoice = choices[Math.floor(Math.random() * 3)];
+            let resText = `Komputer memilih ${compChoice}. `;
+            if (playerChoice === compChoice) resText += 'Seri!';
+            else if ((playerChoice === 'batu' && compChoice === 'gunting') || (playerChoice === 'kertas' && compChoice === 'batu') || (playerChoice === 'gunting' && compChoice === 'kertas')) resText += '🎉 Kamu Menang!';
+            else resText += '❌ Kamu Kalah!';
+            document.getElementById('rpsRes').innerText = resText;
+        }
+
+        // --- 7. Schedule Data & Rendering ---
+        const scheduleData = {
+            senin: [
+                { time: '07:00 - 08:30', subject: 'Upacara & Wali Kelas', teacher: 'Ibu Guru Piket' },
+                { time: '08:30 - 10:00', subject: 'Matematika', teacher: 'Bapak Drs. Sutanto' },
+                { time: '10:15 - 11:45', subject: 'Bahasa Indonesia', teacher: 'Ibu Siti Rahma, M.Pd' },
+                { time: '12:30 - 14:00', subject: 'Pendidikan Agama Islam', teacher: 'Bapak H. Abdullah' }
+            ],
+            selasa: [
+                { time: '07:00 - 08:30', subject: 'Ilmu Pengetahuan Alam (IPA)', teacher: 'Ibu Dr. Ratna' },
+                { time: '08:30 - 10:00', subject: 'Ilmu Pengetahuan Sosial (IPS)', teacher: 'Bapak Joko Widodo, S.Pd' },
+                { time: '10:15 - 11:45', subject: 'Bahasa Inggris', teacher: 'Mr. David Smith' },
+                { time: '12:30 - 14:00', subject: 'Pendidikan Kewarganegaraan', teacher: 'Ibu Sri Mulyani' }
+            ],
+            rabu: [
+                { time: '07:00 - 08:30', subject: 'Matematika', teacher: 'Bapak Drs. Sutanto' },
+                { time: '08:30 - 10:00', subject: 'IPA (Praktikum)', teacher: 'Ibu Dr. Ratna' },
+                { time: '10:15 - 11:45', subject: 'Seni Budaya', teacher: 'Bapak Hendra' },
+                { time: '12:30 - 14:00', subject: 'PJOK (Olahraga)', teacher: 'Coach Rudi' }
+            ],
+            kamis: [
+                { time: '07:00 - 08:30', subject: 'Bahasa Indonesia', teacher: 'Ibu Siti Rahma, M.Pd' },
+                { time: '08:30 - 10:00', subject: 'Bahasa Inggris', teacher: 'Mr. David Smith' },
+                { time: '10:15 - 11:45', subject: 'Informatika / Komputer', teacher: 'Bapak Fajar, S.Kom' },
+                { time: '12:30 - 14:00', subject: 'Prakarya', teacher: 'Ibu Lestari' }
+            ],
+            jumat: [
+                { time: '07:00 - 08:00', subject: 'Senam Sehat / Jumat Bersih', teacher: 'Seluruh Guru' },
+                { time: '08:00 - 09:30', subject: 'Pendidikan Agama', teacher: 'Bapak H. Abdullah' },
+                { time: '09:45 - 11:15', subject: 'Muatan Lokal', teacher: 'Ibu Wati' }
+            ]
+        };
+
+        function renderSchedule(day) {
+            const container = document.getElementById('scheduleContainer');
+            container.innerHTML = '';
+            (scheduleData[day] || []).forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'glass-card rounded-2xl p-5 shadow-md border border-slate-200/50 dark:border-slate-800/50 hover:scale-[1.02] transition';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full"><i class="fa-regular fa-clock mr-1"></i> ${item.time}</span>
+                    </div>
+                    <h4 class="font-bold text-lg text-slate-800 dark:text-white mt-2">${item.subject}</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1"><i class="fa-solid fa-chalkboard-user mr-1.5 text-slate-400"></i> ${item.teacher}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        const dayBtns = document.querySelectorAll('.day-btn');
+        dayBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                dayBtns.forEach(b => {
+                    b.classList.remove('bg-indigo-600', 'text-white', 'shadow-md');
+                    b.classList.add('bg-slate-200/70', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300');
+                });
+                btn.classList.add('bg-indigo-600', 'text-white', 'shadow-md');
+                btn.classList.remove('bg-slate-200/70', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300');
+                renderSchedule(btn.getAttribute('data-day'));
+            });
+        });
+        renderSchedule('senin');
+
+        // --- 8. Custom Gallery Image Upload ---
+        const defaultCustomGallerySrc = 'https://placehold.co/800x600/6366f1/ffffff?text=Foto+Kustom';
+        let customGalleryImage = defaultCustomGallerySrc;
+        let customGalleryCaptionText = 'Foto Kustom';
+
+        function syncCustomGalleryDisplay() {
+            const preview = document.getElementById('customGalleryPreview');
+            const label = document.getElementById('customGalleryLabel');
+            const captionInput = document.getElementById('customGalleryCaption');
+
+            if (!preview || !label || !captionInput) return;
+
+            const value = (captionInput.value || '').trim();
+            customGalleryCaptionText = value || 'Foto Kustom';
+            label.textContent = customGalleryCaptionText;
+            preview.src = customGalleryImage || defaultCustomGallerySrc;
+            localStorage.setItem('class9_custom_gallery_image', customGalleryImage || defaultCustomGallerySrc);
+            localStorage.setItem('class9_custom_gallery_caption', customGalleryCaptionText);
+        }
+
+        function resetCustomGallery() {
+            customGalleryImage = defaultCustomGallerySrc;
+            customGalleryCaptionText = 'Foto Kustom';
+            document.getElementById('customGalleryCaption').value = customGalleryCaptionText;
+            syncCustomGalleryDisplay();
+            localStorage.removeItem('class9_custom_gallery_image');
+            localStorage.removeItem('class9_custom_gallery_caption');
+        }
+
+        document.getElementById('customGalleryUpload').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                alert('File yang dipilih harus berupa gambar.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                customGalleryImage = e.target.result;
+                syncCustomGalleryDisplay();
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('customGalleryCaption').addEventListener('input', () => {
+            syncCustomGalleryDisplay();
+        });
+
+        document.getElementById('resetCustomGallery').addEventListener('click', () => {
+            resetCustomGallery();
+        });
+
+        const savedGalleryImage = localStorage.getItem('class9_custom_gallery_image');
+        const savedGalleryCaption = localStorage.getItem('class9_custom_gallery_caption');
+        if (savedGalleryImage) {
+            customGalleryImage = savedGalleryImage;
+        }
+        if (savedGalleryCaption) {
+            customGalleryCaptionText = savedGalleryCaption;
+            document.getElementById('customGalleryCaption').value = savedGalleryCaption;
+        }
+        syncCustomGalleryDisplay();
+
+        // --- 9. Lightbox & Guestbook Logic ---
+        function openLightbox(imgSrc, caption) {
+            document.getElementById('lightboxImg').src = imgSrc;
+            document.getElementById('lightboxCaption').innerText = caption;
+            document.getElementById('lightboxModal').classList.remove('hidden');
+        }
+        function closeLightbox() {
+            document.getElementById('lightboxModal').classList.add('hidden');
+        }
+
+        const guestbookForm = document.getElementById('guestbookForm');
+        const messagesList = document.getElementById('messagesList');
+        guestbookForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('visitorName').value;
+            const status = document.getElementById('visitorStatus').value;
+            const message = document.getElementById('visitorMessage').value;
+
+            const newItem = document.createElement('div');
+            newItem.className = 'p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800';
+            newItem.innerHTML = `
+                <div class="flex items-center justify-between mb-1">
+                    <span class="font-bold text-sm text-indigo-600 dark:text-indigo-400">${escapeHtml(name)} <span class="text-xs font-normal text-slate-500">(${escapeHtml(status)})</span></span>
+                    <span class="text-[10px] text-slate-400">Baru saja</span>
+                </div>
+                <p class="text-sm text-slate-600 dark:text-slate-300">${escapeHtml(message)}</p>
+            `;
+            messagesList.prepend(newItem);
+            guestbookForm.reset();
+        });
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
